@@ -1,2 +1,2 @@
 # Plant-Hub
-An educational plant monitoring system
+An educational plant monitoring system.
