@@ -9,11 +9,3 @@ setup(name='planthub',
       py_modules=['planthub'],
      )
 
-setup(name='demo',
-      version='1.0',
-      description='CompE Stub Library Demo',
-      author='Keidy Almonte',
-      author_email='ka1783@nyu.edu',
-      url='https://github.com/keidyalmonte/Plant-Hub',
-      py_modules=['demo'],
-     )
