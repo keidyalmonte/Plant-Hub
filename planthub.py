@@ -1,17 +1,35 @@
+import sys
+import Adafruit_DHT
+
 def info():
     '''Prints a basic library description'''
     print("Software library for the Plant Hub project.")
 
 
 '''Humidity Sensor (DHT11) - Returns two values'''
+sensor = 0
+pin = 0
+
 def setup_humidity():
-    print("This sets up the humidity sensor")
+    #print("This sets up the humidity sensor")
+    global sensor
+    global pin
+    sensor = Adafruit_DHT.DHT11
+    pin = 4
 
-def read_humidity():
-    print("This reads humidity values from the humidity sensor")
+def read_humidity_temp():
+    #print("This reads humidity and temperature values from the humidity sensor")
+    humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
+    return humidity, temperature
 
-def read_temp():
-    print("This reads temperature values from the humidity sensor")
+def print_values():
+    while True:
+        try:
+            humidity, temperature = read_humidity_temp()
+            print("Temp={0:0.1f}*C Humidity={1:0.1f}%".format(temperature,humidity))
+        except KeyboardInterrupt:
+	    print("Done reading values")
+            exit()
 
 
 '''Photosensor (DV-P8103)'''
