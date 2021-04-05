@@ -1,5 +1,7 @@
 import sys
 import Adafruit_DHT
+import RPi.GPIO as GPIO
+import time
 
 def info():
     '''Prints a basic library description'''
@@ -23,24 +25,50 @@ def read_humidity_temp():
     return humidity, temperature
 
 def print_values():
-    while True:
-        try:
-            humidity, temperature = read_humidity_temp()
-            print("Temp={0:0.1f}*C Humidity={1:0.1f}%".format(temperature,humidity))
-        except KeyboardInterrupt:
-	    print("Done reading values")
-            exit()
+    humidity, temperature = read_humidity_temp()
+    print("Temp={0:0.1f}*C Humidity={1:0.1f}%".format(temperature,humidity))
 
 
 '''Photosensor (DV-P8103)'''
+# globalize the gpio pins to use in different functions
+GPIO_A = 0
+GPIO_B = 0
+
 def setup_photosensor():
-    print("This sets up the photosensor")
+    global GPIO_A
+    global GPIO_B
+
+    GPIO.setmode(GPIO.BCM) #uses BCM pin numbering
+    GPIO_A = 27
+    GPIO_B = 22
 
 def read_light_level():
-    print("This reads the light level from the photosensor")
+    global GPIO_A
+    global GPIO_B
+    start = 0
+    end = 0
+
+# let capacitor discharge
+    GPIO.setup(GPIO_A, GPIO.IN) #setting A as input will disconnect R_charge & R_var
+    GPIO.setup(GPIO_B, GPIO.OUT)
+    GPIO.output(GPIO_B, GPIO.LOW)
+    time.sleep(1)
+
+# charge through variable resistor
+    GPIO.setup(GPIO_B,GPIO.IN)
+    GPIO.setup(GPIO_A, GPIO.OUT)
+    start = time.time()
+    GPIO.output(GPIO_A, GPIO.HIGH)
+    GPIO.wait_for_edge(GPIO_B, GPIO.RISING, timeout=2000)
+    end = time.time()
+
+    return start, end
+    #print("This reads the light level from the photosensor")
 
 def output_photosensor():
-    print("This outputs the light level from the photosensor")
+    start, end = read_light_level()
+    print("%f seconds, %f us" % (end-start, 1000000*(end-start)))
+    #print("This outputs the light level from the photosensor")
 
 
 '''STEMMA Soil Sensor'''

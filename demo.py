@@ -11,11 +11,11 @@ print("")
 
 print("Humidity Sensor DHT11 TEST")
 print("planthub.setup_humidity()")
-planthub.setup_humidity()
+#planthub.setup_humidity()
 print("planthub.read_humidity_temp()")
-planthub.read_humidity_temp()
+#planthub.read_humidity_temp()
 print("planthub.print_values")
-planthub.print_values()
+#planthub.print_values()
 
 print("")
 
