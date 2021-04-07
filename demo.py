@@ -21,11 +21,11 @@ print("")
 
 print("Photosensor DV-P8103 TEST")
 print("planthub.setup_photosensor()")
-planthub.setup_photosensor()
+#planthub.setup_photosensor()
 print("planthub.read_light_level()")
-planthub.read_light_level()
+#planthub.read_light_level()
 print("planthub.output_photosensor()")
-planthub.output_photosensor()
+#planthub.output_photosensor()
 
 print("")
 

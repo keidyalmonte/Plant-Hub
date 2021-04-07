@@ -7,5 +7,6 @@ setup(name='planthub',
       author_email='ka1783@nyu.edu',
       url='https://github.com/keidyalmonte/Plant-Hub',
       py_modules=['planthub'],
+      install_requires=['Adafruit_DHT']
      )
 
