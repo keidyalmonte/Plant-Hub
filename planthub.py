@@ -1,3 +1,4 @@
+import Adafruit_DHT
 import sys
 import RPi.GPIO as GPIO
 import time
@@ -124,15 +125,13 @@ def setup_buttons():
 
 def detect_push():
     #print("This detects button pushes")
-    GPIO.add_event_detect(b1, GPIO.FALLING, callback=detect_interrupt(b1))
-    GPIO.add_event_detect(b2, GPIO.FALLING, callback=detect_interrupt(b2))
-    GPIO.add_event_detect(b3, GPIO.FALLING, callback=detect_interrupt(b3))
-    GPIO.add_event_detect(b4, GPIO.FALLING, callback=detect_interrupt(b4))
-    GPIO.add_event_detect(b5, GPIO.FALLING, callback=detect_interrupt(b5))
+    GPIO.add_event_detect(b1, GPIO.FALLING, callback=lambda x: detect_interrupt(b1))
+    GPIO.add_event_detect(b2, GPIO.FALLING, callback=lambda x: detect_interrupt(b2))
+    GPIO.add_event_detect(b3, GPIO.FALLING, callback=lambda x: detect_interrupt(b3))
+    GPIO.add_event_detect(b4, GPIO.FALLING, callback=lambda x: detect_interrupt(b4))
+    GPIO.add_event_detect(b5, GPIO.FALLING, callback=lambda x: detect_interrupt(b5))
 
 def detect_interrupt(button):
     #print("This detects interrupts from the buttons")
     print("button =", button)
     return button
-
-GPIO.cleanup()
