@@ -37,15 +37,17 @@ except KeyboardInterrupt:
 print("")
 
 print("STEMMA Soil Sensor TEST")
-print("planthub.setup_soil()")
-planthub.setup_soil()
-print("planthub.soil_moisture()")
-planthub.soil_moisture()
-print("planthub.soil_temp()")
-planthub.soil_temp()
+try:
+    print("planthub.setup_soil()")
+    planthub.setup_soil()
+    print("planthub.soil_moisture()")
+    planthub.soil_moisture()
+    print("planthub.soil_temp()")
+    planthub.soil_temp()
+except KeyboardInterrupt:
+    print("")
 
 print("")
-
 print("LCD Display TEST")
 print("planthub.setup_display()")
 planthub.setup_display()

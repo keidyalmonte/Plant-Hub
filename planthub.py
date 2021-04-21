@@ -3,6 +3,11 @@ import sys
 import RPi.GPIO as GPIO
 import time
 
+from board import SCL, SDA
+import busio
+
+from adafruit_seesaw.seesaw import Seesaw
+
 def info():
     '''Prints a basic library description'''
     print("Software library for the Plant Hub project.")
@@ -72,14 +77,23 @@ def output_photosensor():
 
 
 '''STEMMA Soil Sensor'''
+i2c_bus = busio.I2C(SCL,SDA)
+ss = Seesaw(i2c_bus, addr=0x36)
+
 def setup_soil():
+    i2c_bus = busio.I2C(SCL,SDA)
+    ss = Seesaw(i2c_bus, addr=0x36)
     print("This sets up the STEMMA Soil Sensor")
 
 def soil_moisture():
-    print("This reads the moisture values from the soil sensor")
+    moisture = ss.moisture_read()
+    print("moisture: ", str(moisture))
+    #print("This reads the moisture values from the soil sensor")
 
 def soil_temp():
-    print("This reads the temperature values from the soil sensor")
+    temp = ss.get_temp()
+    print("temp: ", str(temp))
+    #print("This reads the temperature values from the soil sensor")
 
 
 '''LCD Display'''
