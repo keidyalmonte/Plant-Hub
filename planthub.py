@@ -8,6 +8,9 @@ import busio
 
 from adafruit_seesaw.seesaw import Seesaw
 
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+
 def info():
     '''Prints a basic library description'''
     print("Software library for the Plant Hub project.")
@@ -83,7 +86,7 @@ ss = Seesaw(i2c_bus, addr=0x36)
 def setup_soil():
     i2c_bus = busio.I2C(SCL,SDA)
     ss = Seesaw(i2c_bus, addr=0x36)
-    print("This sets up the STEMMA Soil Sensor")
+    #print("This sets up the STEMMA Soil Sensor")
 
 def soil_moisture():
     moisture = ss.moisture_read()
@@ -97,55 +100,152 @@ def soil_temp():
 
 
 '''LCD Display'''
+# GPIO pin to LCD pin mapping
+LCD_RS = 0
+LCD_E = 0
+LCD_D4 = 0
+LCD_D5 = 0
+LCD_D6 = 0
+LCD_D7 = 0
+
+# Define state of RS pin in character and command mode
+LCD_CHR = GPIO.HIGH # High in data (character) mode
+LCD_CMD = GPIO.LOW # Low in instruction (command) mode
+
+#Important commands
+LCD_CLEAR = 0
+LCD_D_OFF = 0
+LCD_4BIT1 = 0
+LCD_4BIT2 = 0
+LCD_ON_NC = 0
+LCD_ENTRY = 0
+
+# Timing constants
+E_PULSE = 0.0005
+E_DELAY = 0.0005
+
+def char_to_arr(c):
+    return [int(b) for b in format(ord(c), '08b')]
+
 def setup_display():
-    print("This sets up the LCD Display")
+    global LCD_RS, LCD_E, LCD_D4, LCD_D5, LCD_D6, LCD_D7, LCD_CHR, LCD_CMD, LCD_CLEAR, LCD_D_OFF, LCD_4BIT1, LCD_4BIT2, LCD_ON_NC, LCD_ENTRY, E_PULSE, E_DELAY
+    GPIO.setmode(GPIO.BCM)
+
+# GPIO pin to LCD pin mapping
+    LCD_RS = 6
+    LCD_E = 5
+    LCD_D4 = 25
+    LCD_D5 = 24
+    LCD_D6 = 23
+    LCD_D7 = 22
+
+# Define state of RS pin in character and command mode
+    LCD_CHR = GPIO.HIGH # High in data (character) mode
+    LCD_CMD = GPIO.LOW # Low in instruction (command) mode
+
+#Important commands
+    LCD_CLEAR = [0,0,0,0,0,0,0,1]
+    LCD_D_OFF = [0,0,0,0,1,0,0,0]
+    LCD_4BIT1 = [0,0,1,1,0,0,1,1]
+    LCD_4BIT2 = [0,0,1,1,0,0,1,0]
+    LCD_ON_NC = [0,0,0,0,1,1,0,0]
+    LCD_ENTRY = [0,0,0,0,0,1,1,0]
+
+# Timing constants
+    E_PULSE = 0.0005
+    E_DELAY = 0.0005
+
+    #print("This sets up the LCD Display")
+    pins = [LCD_RS, LCD_E, LCD_D7, LCD_D6, LCD_D5, LCD_D4]
+
+    for p in zip(pins):
+        GPIO.setup(p, GPIO.OUT)
+
+    write_arr_4_bit(LCD_4BIT1, LCD_CMD)
+    write_arr_4_bit(LCD_4BIT2, LCD_CMD)
+    write_arr_4_bit(LCD_ON_NC, LCD_CMD)
+    write_arr_4_bit(LCD_ENTRY, LCD_CMD)
+    write_arr_4_bit(LCD_CLEAR, LCD_CMD)
+
+def write_text(phrase):
+    for c in phrase:
+        write_arr_4_bit(char_to_arr(c), LCD_CHR)
 
 def turn_on_display():
+    setup_display()
     print("This turns on the LCD Display")
 
 def turn_off_display():
-    print("This turns off the LCD Display")
+    write_arr_4_bit(LCD_CLEAR, LCD_CMD) #clear display
+    write_arr_4_bit(LCD_D_OFF, LCD_CMD) # turns display off 0000 1000
+    GPIO.cleanup()
 
-def write_text():
-    print("This writes texts to the LCD Display")
+def write_arr_4_bit(bits, mode, debug=True):
+    global LCD_RS
+    #print("This writes texts to the LCD Display")
+    pins = [LCD_D7, LCD_D6, LCD_D5, LCD_D4]
 
+    GPIO.output(LCD_RS, mode) #RS - command or character mode
 
-'''Potentiometer'''
-def setup_potentiometer():
-    print("This sets up the potentiometer")
+    # set most significant bits (high bits) on data lines
+    for p, b in zip(pins, bits[:4]):
+        GPIO.setup(p, GPIO.OUT)
+        GPIO.output(p,b)
 
-def set_resistance_p():
-    print("This sets the resistance for the potentiometer")
+    # pulse clock
+    time.sleep(E_DELAY)
+    GPIO.output(LCD_E, GPIO.HIGH)
+    time.sleep(E_PULSE)
+    GPIO.output(LCD_E, GPIO.LOW)
+    time.sleep(E_DELAY)
+
+    # set least significant bits on data lines
+    for p, b in zip(pins, bits[4:]):
+        GPIO.setup(p, GPIO.OUT)
+        GPIO.output(p, b)
+
+    # pulse clock
+    time.sleep(E_DELAY)
+    GPIO.output(LCD_E, GPIO.HIGH)
+    time.sleep(E_PULSE)
+    GPIO.output(LCD_E, GPIO.LOW)
+    time.sleep(E_DELAY)
+
+    # reset pins to 0
+    for p in pins:
+        GPIO.output(p, GPIO.LOW)
+
 
 
 '''Buttons'''
 #globalize the buttons first
-b1 = 7
+#b1 = 7
 b2 = 12
 b3 = 13
 b4 = 16
 b5 = 26
 
 def setup_buttons():
-    global b1, b2, b3, b4, b5
+    global b2, b3, b4, b5
     #print("This sets up the buttons")
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
-    GPIO.setup(b1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    #GPIO.setup(b1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(b2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(b3, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(b4, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(b5, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def detect_push():
+    global b2, b3, b4, b5
     #print("This detects button pushes")
-    GPIO.add_event_detect(b1, GPIO.FALLING, callback=lambda x: detect_interrupt(b1))
+    #GPIO.add_event_detect(b1, GPIO.FALLING, callback=lambda x: detect_interrupt(b1))
     GPIO.add_event_detect(b2, GPIO.FALLING, callback=lambda x: detect_interrupt(b2))
     GPIO.add_event_detect(b3, GPIO.FALLING, callback=lambda x: detect_interrupt(b3))
     GPIO.add_event_detect(b4, GPIO.FALLING, callback=lambda x: detect_interrupt(b4))
     GPIO.add_event_detect(b5, GPIO.FALLING, callback=lambda x: detect_interrupt(b5))
 
 def detect_interrupt(button):
-    #print("This detects interrupts from the buttons")
+    print("This detects interrupts from the buttons")
     print("button =", button)
     return button
