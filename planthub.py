@@ -27,18 +27,20 @@ def setup_humidity():
     sensor = Adafruit_DHT.DHT11
     pin = 4
 
-def read_humidity():
+def read_humidity_temp():
     #print("This reads humidity and temperature values from the humidity sensor")
     humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
-    return humidity
+    return humidity, temperature
 
 def print_humidity():
     humidity, temperature = read_humidity_temp()
-    print("Humidity={1:0.1f}%".format(humidity))
+#    print("Humidity={0.1f}%".format(humidity))
+    return str(humidity)
 
 def print_temp():
     humidity, temperature = read_humidity_temp()
-    print("Temp={0:0.1f}*C%".format(temperature))
+#    form = ("Temp={0.1f}*C%".format(temperature))
+    return str(temp)
 
 '''Photosensor (DV-P8103)'''
 # globalize the gpio pins to use in different functions
@@ -176,12 +178,15 @@ def write_text(phrase):
 
 def turn_on_display():
     setup_display()
-    print("This turns on the LCD Display")
+    #print("This turns on the LCD Display")
 
 def turn_off_display():
     write_arr_4_bit(LCD_CLEAR, LCD_CMD) #clear display
     write_arr_4_bit(LCD_D_OFF, LCD_CMD) # turns display off 0000 1000
     GPIO.cleanup()
+
+def clear_display():
+    write_arr_4_bit(LCD_CLEAR, LCD_CMD) #clear display
 
 def write_arr_4_bit(bits, mode, debug=True):
     global LCD_RS
@@ -224,7 +229,7 @@ def write_arr_4_bit(bits, mode, debug=True):
 #globalize the buttons first
 b1 = 16
 b2 = 26
-state = 0
+state1 = 0
 
 def setup_buttons():
     global b1, b2
@@ -242,15 +247,15 @@ def detect_push():
     GPIO.add_event_detect(b2, GPIO.FALLING, callback=lambda x: detect_interrupt(b2))
 
 def detect_interrupt(button):
-    global state
-    print("This detects interrupts from the buttons")
-    print("button =", button)
-    state = 0
+    global state1
+    state1 = 0
     if button == 16:
-       state = 1
+       state1 = 1
+       print("on/off")
     elif button == 26:
-       state = 2
+       state1 = 2
+       print("switch screens")
 
 def state():
-    global state
-    return state
+    global state1
+    return state1
