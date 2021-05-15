@@ -27,15 +27,18 @@ def setup_humidity():
     sensor = Adafruit_DHT.DHT11
     pin = 4
 
-def read_humidity_temp():
+def read_humidity():
     #print("This reads humidity and temperature values from the humidity sensor")
     humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
-    return humidity, temperature
+    return humidity
 
-def print_values():
+def print_humidity():
     humidity, temperature = read_humidity_temp()
-    print("Temp={0:0.1f}*C Humidity={1:0.1f}%".format(temperature,humidity))
+    print("Humidity={1:0.1f}%".format(humidity))
 
+def print_temp():
+    humidity, temperature = read_humidity_temp()
+    print("Temp={0:0.1f}*C%".format(temperature))
 
 '''Photosensor (DV-P8103)'''
 # globalize the gpio pins to use in different functions
@@ -47,8 +50,8 @@ def setup_photosensor():
     global GPIO_B
 
     GPIO.setmode(GPIO.BCM) #uses BCM pin numbering
-    GPIO_A = 27
-    GPIO_B = 22
+    GPIO_A = 17
+    GPIO_B = 27
 
 def read_light_level():
     global GPIO_A
@@ -75,7 +78,7 @@ def read_light_level():
 
 def output_photosensor():
     start, end = read_light_level()
-    print("%f seconds, %f us" % (end-start, 1000000*(end-start)))
+    return ("%f seconds, %f us" % (end-start, 1000000*(end-start)))
     #print("This outputs the light level from the photosensor")
 
 
@@ -90,12 +93,12 @@ def setup_soil():
 
 def soil_moisture():
     moisture = ss.moisture_read()
-    print("moisture: ", str(moisture))
+    return moisture
     #print("This reads the moisture values from the soil sensor")
 
 def soil_temp():
     temp = ss.get_temp()
-    print("temp: ", str(temp))
+    return temp
     #print("This reads the temperature values from the soil sensor")
 
 
@@ -219,33 +222,35 @@ def write_arr_4_bit(bits, mode, debug=True):
 
 '''Buttons'''
 #globalize the buttons first
-#b1 = 7
-b2 = 12
-b3 = 13
-b4 = 16
-b5 = 26
+b1 = 16
+b2 = 26
+state = 0
 
 def setup_buttons():
-    global b2, b3, b4, b5
+    global b1, b2
     #print("This sets up the buttons")
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
-    #GPIO.setup(b1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    GPIO.setup(b1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(b2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(b3, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(b4, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(b5, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def detect_push():
-    global b2, b3, b4, b5
+    global b1, b2
     #print("This detects button pushes")
-    #GPIO.add_event_detect(b1, GPIO.FALLING, callback=lambda x: detect_interrupt(b1))
+    GPIO.add_event_detect(b1, GPIO.FALLING, callback=lambda x: detect_interrupt(b1))
     GPIO.add_event_detect(b2, GPIO.FALLING, callback=lambda x: detect_interrupt(b2))
-    GPIO.add_event_detect(b3, GPIO.FALLING, callback=lambda x: detect_interrupt(b3))
-    GPIO.add_event_detect(b4, GPIO.FALLING, callback=lambda x: detect_interrupt(b4))
-    GPIO.add_event_detect(b5, GPIO.FALLING, callback=lambda x: detect_interrupt(b5))
 
 def detect_interrupt(button):
+    global state
     print("This detects interrupts from the buttons")
     print("button =", button)
-    return button
+    state = 0
+    if button == 16:
+       state = 1
+    elif button == 26:
+       state = 2
+
+def state():
+    global state
+    return state
